@@ -31,3 +31,8 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### Project Specific ###
+logs/
+src/main/resources/application-prod.properties
+
