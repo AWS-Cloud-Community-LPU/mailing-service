@@ -13,6 +13,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @Slf4j
@@ -27,10 +28,14 @@ public class S3ServiceImpl implements S3Service {
 
 	@Override
 	public String uploadTemplate(String bucketName, MultipartFile templateFile) {
-		ObjectMetadata data = new ObjectMetadata();
-		data.setContentType(templateFile.getContentType());
-		data.setContentLength(templateFile.getSize());
-		if (templateFile.getOriginalFilename().endsWith(".template")) {
+		if (verifyTemplate(Objects.requireNonNull(templateFile.getOriginalFilename()))) {
+			ObjectMetadata data = new ObjectMetadata();
+			data.setContentType(templateFile.getContentType());
+			data.setContentLength(templateFile.getSize());
+			List<S3ObjectSummary> s3ObjectSummaries = listTemplates();
+			s3ObjectSummaries.stream().forEach((s3ObjectSummary) -> {
+				if (s3ObjectSummary.getKey().equals(templateFile.getOriginalFilename())) throw new RuntimeException();
+			});
 			try {
 				s3Client.putObject(bucketName, templateFile.getOriginalFilename(), templateFile.getInputStream(), data);
 			} catch (IOException e) {
@@ -47,12 +52,13 @@ public class S3ServiceImpl implements S3Service {
 		List<S3ObjectSummary> s3ObjectSummaries = new ArrayList<>();
 		for (Bucket b : buckets)
 			for (S3ObjectSummary s3ObjectSummary : s3Client.listObjects(b.getName()).getObjectSummaries())
-				if (s3ObjectSummary.getKey().endsWith(".template")) s3ObjectSummaries.add(s3ObjectSummary);
+				if (verifyTemplate(s3ObjectSummary.getKey())) s3ObjectSummaries.add(s3ObjectSummary);
 		return s3ObjectSummaries;
 	}
 
 	@Override
 	public S3Object viewTemplate(String templateName) {
+		if (!verifyTemplate(templateName)) return null;
 		for (S3ObjectSummary s3ObjectSummary : listTemplates())
 			if (s3ObjectSummary.getKey().equals(templateName))
 				return s3Client.getObject(s3ObjectSummary.getBucketName(), s3ObjectSummary.getKey());
@@ -61,11 +67,16 @@ public class S3ServiceImpl implements S3Service {
 
 	@Override
 	public String deleteTemplate(String templateName) {
+		verifyTemplate(templateName);
 		for (S3ObjectSummary s3ObjectSummary : listTemplates())
 			if (s3ObjectSummary.getKey().equals(templateName)) {
 				s3Client.deleteObject(s3ObjectSummary.getBucketName(), s3ObjectSummary.getKey());
-				return "Done";
+				return "DONE";
 			}
 		return null;
+	}
+
+	public boolean verifyTemplate(String templateName) {
+		return templateName.endsWith(".template");
 	}
 }
