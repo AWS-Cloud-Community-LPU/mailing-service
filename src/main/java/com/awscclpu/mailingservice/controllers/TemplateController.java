@@ -32,12 +32,12 @@ public class TemplateController {
 	}
 
 	@GetMapping("/view")
-	public ResponseEntity<S3Object> viewBucket(@RequestHeader String templateName) {
+	public ResponseEntity<S3Object> viewTemplate(@RequestHeader String templateName) {
 		return ResponseEntity.ok(s3Service.viewTemplate(templateName));
 	}
 
 	@PostMapping("/delete")
-	public ResponseEntity<String> deleteBucket(@RequestHeader String templateName) {
+	public ResponseEntity<String> deleteTemplate(@RequestHeader String templateName) {
 		return ResponseEntity.ok(s3Service.deleteTemplate(templateName));
 	}
 }
