@@ -3,7 +3,7 @@ package com.awscclpu.mailingservice.controllers;
 import com.amazonaws.services.s3.model.S3Object;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
 import com.awscclpu.mailingservice.services.S3Service;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.awscclpu.mailingservice.services.UserService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -12,13 +12,10 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/template")
-public class TemplateController {
+public class TemplateController extends BaseController {
 
-	private final S3Service s3Service;
-
-	@Autowired
-	public TemplateController(S3Service s3Service) {
-		this.s3Service = s3Service;
+	public TemplateController(UserService userService, S3Service s3Service) {
+		super(userService, s3Service);
 	}
 
 	@PostMapping("/upload")

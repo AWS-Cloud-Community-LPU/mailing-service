@@ -1,18 +1,15 @@
 package com.awscclpu.mailingservice.controllers;
 
+import com.awscclpu.mailingservice.services.S3Service;
 import com.awscclpu.mailingservice.services.UserService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/user")
-public class UserController {
+public class UserController extends BaseController {
 
-	private final UserService userService;
-
-	@Autowired
-	public UserController(UserService userService) {
-		this.userService = userService;
+	public UserController(UserService userService, S3Service s3Service) {
+		super(userService, s3Service);
 	}
 
 	@PostMapping("/register")
