@@ -11,9 +11,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
+
 
 @Service
 @Slf4j
@@ -33,7 +34,7 @@ public class S3ServiceImpl implements S3Service {
 			data.setContentType(templateFile.getContentType());
 			data.setContentLength(templateFile.getSize());
 			List<S3ObjectSummary> s3ObjectSummaries = listTemplates();
-			s3ObjectSummaries.stream().forEach((s3ObjectSummary) -> {
+			s3ObjectSummaries.forEach((s3ObjectSummary) -> {
 				if (s3ObjectSummary.getKey().equals(templateFile.getOriginalFilename())) throw new RuntimeException();
 			});
 			try {
@@ -49,30 +50,27 @@ public class S3ServiceImpl implements S3Service {
 	@Override
 	public List<S3ObjectSummary> listTemplates() {
 		List<Bucket> buckets = s3Client.listBuckets();
-		List<S3ObjectSummary> s3ObjectSummaries = new ArrayList<>();
-		for (Bucket b : buckets)
-			for (S3ObjectSummary s3ObjectSummary : s3Client.listObjects(b.getName()).getObjectSummaries())
-				if (verifyTemplate(s3ObjectSummary.getKey())) s3ObjectSummaries.add(s3ObjectSummary);
-		return s3ObjectSummaries;
+		return buckets.stream()
+				.flatMap(b -> s3Client.listObjects(b.getName()).getObjectSummaries().stream())
+				.filter(s3ObjectSummary -> verifyTemplate(s3ObjectSummary.getKey()))
+				.collect(Collectors.toList());
 	}
 
 	@Override
 	public S3Object viewTemplate(String templateName) {
 		if (!verifyTemplate(templateName)) return null;
-		for (S3ObjectSummary s3ObjectSummary : listTemplates())
-			if (s3ObjectSummary.getKey().equals(templateName))
-				return s3Client.getObject(s3ObjectSummary.getBucketName(), s3ObjectSummary.getKey());
-		return null;
+		return listTemplates().stream()
+				.filter(s3ObjectSummary -> s3ObjectSummary.getKey().equals(templateName)).findFirst()
+				.map(s3ObjectSummary -> s3Client.getObject(s3ObjectSummary.getBucketName(), s3ObjectSummary.getKey()))
+				.orElse(null);
 	}
 
 	@Override
 	public String deleteTemplate(String templateName) {
 		verifyTemplate(templateName);
-		for (S3ObjectSummary s3ObjectSummary : listTemplates())
-			if (s3ObjectSummary.getKey().equals(templateName)) {
-				s3Client.deleteObject(s3ObjectSummary.getBucketName(), s3ObjectSummary.getKey());
-				return "DONE";
-			}
+		listTemplates().stream()
+				.filter(s3ObjectSummary -> s3ObjectSummary.getKey().equals(templateName))
+				.forEach(s3ObjectSummary -> s3Client.deleteObject(s3ObjectSummary.getBucketName(), s3ObjectSummary.getKey()));
 		return null;
 	}
 
