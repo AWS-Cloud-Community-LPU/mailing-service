@@ -18,6 +18,10 @@ public class BaseController {
 	protected final S3Service s3Service;
 	@Value("${" + PropertyConstants.APPNAME + "}")
 	private String appName;
+	@Value("${git.commit.id.abbrev}")
+	private String commitId;
+	@Value("${git.branch}")
+	private String branch;
 
 	@Autowired
 	public BaseController(UserService userService, S3Service s3Service) {
@@ -27,6 +31,6 @@ public class BaseController {
 
 	@GetMapping
 	private ResponseEntity<String> base() {
-		return ResponseEntity.ok(String.format("Hello World! This is %s", appName));
+		return ResponseEntity.ok(String.format("<h4>Hello World!</h4> This is %s. <br>Version: %s/%s", appName, branch, commitId));
 	}
 }
