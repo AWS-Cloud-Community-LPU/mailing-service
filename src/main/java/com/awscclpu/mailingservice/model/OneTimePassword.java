@@ -1,4 +1,4 @@
-package com.awscclpu.mailingservice.modal;
+package com.awscclpu.mailingservice.model;
 
 import lombok.Getter;
 import lombok.Setter;

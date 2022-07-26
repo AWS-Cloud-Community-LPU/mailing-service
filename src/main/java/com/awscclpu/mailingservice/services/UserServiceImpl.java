@@ -1,7 +1,7 @@
 package com.awscclpu.mailingservice.services;
 
-import com.awscclpu.mailingservice.modal.OneTimePassword;
-import com.awscclpu.mailingservice.modal.User;
+import com.awscclpu.mailingservice.model.OneTimePassword;
+import com.awscclpu.mailingservice.model.User;
 import com.awscclpu.mailingservice.repositories.UserRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,7 +24,7 @@ public class UserServiceImpl implements UserService {
 		User user = userRepository.findByEmail(email);
 		if (user == null) {
 			user = new User(name, email);
-		} else if (user != null && !user.isActive() && !user.getOneTimePassword().isActive()) {
+		} else if (!user.isActive() && !user.getOneTimePassword().isActive()) {
 			user.setOneTimePassword(new OneTimePassword());
 		} else {
 			log.info("User Already Exists");
@@ -35,7 +35,7 @@ public class UserServiceImpl implements UserService {
 	}
 
 	public String deRegisterUser(String email) {
-		//TODO: Send response in modal
+		//TODO: Send response in model
 		log.info("De-Registration Request received for user with email: " + email);
 		long initDeRegisterStartTime = System.currentTimeMillis();
 		String response;

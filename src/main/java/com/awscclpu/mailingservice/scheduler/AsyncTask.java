@@ -1,6 +1,6 @@
 package com.awscclpu.mailingservice.scheduler;
 
-import com.awscclpu.mailingservice.modal.User;
+import com.awscclpu.mailingservice.model.User;
 import com.awscclpu.mailingservice.repositories.UserRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;

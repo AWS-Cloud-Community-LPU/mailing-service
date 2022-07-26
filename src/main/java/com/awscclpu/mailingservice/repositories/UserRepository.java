@@ -1,6 +1,6 @@
 package com.awscclpu.mailingservice.repositories;
 
-import com.awscclpu.mailingservice.modal.User;
+import com.awscclpu.mailingservice.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

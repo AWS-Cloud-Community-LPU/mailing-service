@@ -1,4 +1,4 @@
-package com.awscclpu.mailingservice.modal;
+package com.awscclpu.mailingservice.model;
 
 import com.awscclpu.mailingservice.constants.EmailConstants;
 import lombok.Getter;
