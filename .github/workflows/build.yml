@@ -5,7 +5,6 @@ name: Java CI with Maven
 
 on:
   push:
-    branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
 
@@ -21,6 +20,14 @@ jobs:
       with:
         java-version: '17'
         distribution: 'corretto'
-        cache: maven
     - name: Build with Maven
-      run: mvn -B package --file pom.xml
+      run: |
+        pwd
+        java -version
+        ./mvnw --version
+        ./mvnw -B package --file pom.xml
+    - name: Upload JAR
+      uses: actions/upload-artifact@v3
+      with:
+        name: Mailing-Service-JAR
+        path: /home/runner/work/mailing-service/mailing-service/target/*.jar
