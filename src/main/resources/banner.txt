@@ -1,0 +1,2 @@
+Mailing Service
+Powered by Spring Boot ${spring-boot.version}

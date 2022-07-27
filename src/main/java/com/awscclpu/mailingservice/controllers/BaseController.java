@@ -16,7 +16,7 @@ public class BaseController {
 
 	protected final UserService userService;
 	protected final S3Service s3Service;
-	@Value("${" + PropertyConstants.APPNAME + "}")
+	@Value("${" + PropertyConstants.APP_NAME + "}")
 	private String appName;
 	@Value("${git.commit.id.abbrev}")
 	private String commitId;

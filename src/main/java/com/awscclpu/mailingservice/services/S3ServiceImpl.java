@@ -44,7 +44,7 @@ public class S3ServiceImpl implements S3Service {
 				throw new RuntimeException(e);
 			}
 		}
-		return null;
+		return "DONE";
 	}
 
 	@Override

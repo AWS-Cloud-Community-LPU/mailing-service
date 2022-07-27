@@ -47,7 +47,7 @@ public class User {
 		this.name = name;
 		this.email = email;
 		this.active = false;
-		this.sent_emails = 0l;
+		this.sent_emails = 0L;
 		this.oneTimePassword = new OneTimePassword();
 		this.mailingType = EmailConstants.SendType.BCC;
 	}
