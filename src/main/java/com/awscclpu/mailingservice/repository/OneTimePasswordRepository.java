@@ -1,4 +1,4 @@
-package com.awscclpu.mailingservice.repositories;
+package com.awscclpu.mailingservice.repository;
 
 import com.awscclpu.mailingservice.model.OneTimePassword;
 import org.springframework.data.jpa.repository.JpaRepository;

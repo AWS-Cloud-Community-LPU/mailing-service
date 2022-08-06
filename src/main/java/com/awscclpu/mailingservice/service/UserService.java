@@ -1,4 +1,4 @@
-package com.awscclpu.mailingservice.services;
+package com.awscclpu.mailingservice.service;
 
 public interface UserService {
 

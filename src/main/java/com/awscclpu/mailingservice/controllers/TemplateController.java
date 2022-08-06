@@ -2,8 +2,8 @@ package com.awscclpu.mailingservice.controllers;
 
 import com.amazonaws.services.s3.model.S3Object;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
-import com.awscclpu.mailingservice.services.S3Service;
-import com.awscclpu.mailingservice.services.UserService;
+import com.awscclpu.mailingservice.service.S3Service;
+import com.awscclpu.mailingservice.service.UserService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;

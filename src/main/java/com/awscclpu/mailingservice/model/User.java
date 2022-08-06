@@ -1,6 +1,6 @@
 package com.awscclpu.mailingservice.model;
 
-import com.awscclpu.mailingservice.constants.EmailConstants;
+import com.awscclpu.mailingservice.constant.EmailConstants;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.UpdateTimestamp;

@@ -1,8 +1,8 @@
 package com.awscclpu.mailingservice.controllers;
 
-import com.awscclpu.mailingservice.constants.PropertyConstants;
-import com.awscclpu.mailingservice.services.S3Service;
-import com.awscclpu.mailingservice.services.UserService;
+import com.awscclpu.mailingservice.constant.PropertyConstants;
+import com.awscclpu.mailingservice.service.S3Service;
+import com.awscclpu.mailingservice.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
@@ -18,7 +18,7 @@ public class BaseController {
 	protected final S3Service s3Service;
 	@Value("${" + PropertyConstants.APP_NAME + "}")
 	private String appName;
-	@Value("${git.commit.id.abbrev}")
+	@Value("${git.commit.id.full}")
 	private String commitId;
 	@Value("${git.branch}")
 	private String branch;
@@ -31,6 +31,6 @@ public class BaseController {
 
 	@GetMapping
 	private ResponseEntity<String> base() {
-		return ResponseEntity.ok(String.format("<h4>Hello World!</h4> This is %s. <br>Version: %s/%s", appName, branch, commitId));
+		return ResponseEntity.ok(String.format("<h4>Hello World!</h4> This is %s. <br>Branch: %s <br>Commit: %s", appName, branch, commitId));
 	}
 }

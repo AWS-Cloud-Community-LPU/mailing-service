@@ -1,7 +1,7 @@
 package com.awscclpu.mailingservice.controllers;
 
-import com.awscclpu.mailingservice.services.S3Service;
-import com.awscclpu.mailingservice.services.UserService;
+import com.awscclpu.mailingservice.service.S3Service;
+import com.awscclpu.mailingservice.service.UserService;
 import org.springframework.web.bind.annotation.*;
 
 @RestController

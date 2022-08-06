@@ -1,4 +1,4 @@
-package com.awscclpu.mailingservice.services;
+package com.awscclpu.mailingservice.service;
 
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.Bucket;

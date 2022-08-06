@@ -1,8 +1,8 @@
-package com.awscclpu.mailingservice.services;
+package com.awscclpu.mailingservice.service;
 
 import com.awscclpu.mailingservice.model.OneTimePassword;
 import com.awscclpu.mailingservice.model.User;
-import com.awscclpu.mailingservice.repositories.UserRepository;
+import com.awscclpu.mailingservice.repository.UserRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

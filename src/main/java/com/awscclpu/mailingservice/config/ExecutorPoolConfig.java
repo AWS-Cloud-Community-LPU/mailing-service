@@ -1,6 +1,6 @@
 package com.awscclpu.mailingservice.config;
 
-import com.awscclpu.mailingservice.constants.PropertyConstants;
+import com.awscclpu.mailingservice.constant.PropertyConstants;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
