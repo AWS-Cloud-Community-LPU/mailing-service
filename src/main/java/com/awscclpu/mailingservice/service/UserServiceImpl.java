@@ -1,10 +1,13 @@
 package com.awscclpu.mailingservice.service;
 
-import com.awscclpu.mailingservice.model.OneTimePassword;
+import com.awscclpu.mailingservice.constant.Constants;
+import com.awscclpu.mailingservice.exception.APIInfo;
 import com.awscclpu.mailingservice.model.User;
+import com.awscclpu.mailingservice.model.UserDTO;
 import com.awscclpu.mailingservice.repository.UserRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -12,61 +15,86 @@ import org.springframework.stereotype.Service;
 public class UserServiceImpl implements UserService {
 
 	final UserRepository userRepository;
+	final OTPService otpService;
 
 	@Autowired
-	public UserServiceImpl(UserRepository userRepository) {
+	public UserServiceImpl(UserRepository userRepository, OTPService otpService) {
 		this.userRepository = userRepository;
+		this.otpService = otpService;
 	}
 
-	public String registerUser(String name, String email) {
-		log.info("Registration Request received for user: " + name + " with email: " + email);
+	public APIInfo registerUser(UserDTO userDTO) {
+		log.info("Registration request received for user: " + userDTO.getName() + " with email: " + userDTO.getEmail());
 		long initRegisterStartTime = System.currentTimeMillis();
-		User user = userRepository.findByEmail(email);
+
+		User user = userRepository.findByEmailAndUsername(userDTO.getEmail(), userDTO.getUsername());
 		if (user == null) {
-			user = new User(name, email);
-		} else if (!user.isActive() && !user.getOneTimePassword().isActive()) {
-			user.setOneTimePassword(new OneTimePassword());
+			user = new User(userDTO);
+			otpService.generateOTP(userDTO.getUsername() + Constants.VerificationType.REGISTER);
+		} else if (!user.isActive()) {
+			otpService.generateOTP(userDTO.getUsername() + Constants.VerificationType.REGISTER);
 		} else {
-			log.info("User Already Exists");
+			log.error("Validation failed for user with Email: " + user.getEmail());
+			return new APIInfo(HttpStatus.BAD_REQUEST, user.getUsername(), "Validation Failed");
 		}
+
 		userRepository.save(user);
-		log.info("Registration Request Completed for: " + name + " with email: " + email + " in Time: " + (System.currentTimeMillis() - initRegisterStartTime) + "ms");
-		return "OK";
+		log.info("Registration request completed for: " + userDTO.getName() + " with email: " + userDTO.getEmail() + " in Time: " + (System.currentTimeMillis() - initRegisterStartTime) + "ms");
+		return new APIInfo(HttpStatus.ACCEPTED, user.getUsername(), "User Registration Started");
 	}
 
-	public String deRegisterUser(String email) {
-		//TODO: Send response in model
-		log.info("De-Registration Request received for user with email: " + email);
+	public APIInfo deRegisterUser(UserDTO userDTO) {
+		log.info("De-Registration request received for user with email: " + userDTO.getEmail());
 		long initDeRegisterStartTime = System.currentTimeMillis();
-		String response;
-		User user = userRepository.findByEmail(email);
-		if (user != null && user.isActive()) {
-			user.setOneTimePassword(new OneTimePassword());
-			userRepository.save(user);
-			response = "OK";
-		} else if (user == null) {
-			response = "USER NOT FOUND";
+
+		User user = userRepository.findByEmailAndUsername(userDTO.getEmail(), userDTO.getUsername());
+		if (user == null) {
+			log.error("No User found with Email: " + userDTO.getEmail() + " and username: " + userDTO.getUsername());
+			return new APIInfo(HttpStatus.BAD_REQUEST, userDTO.getEmail(), "No user found");
+		} else if (user.getUsername().equals(userDTO.getUsername()) && user.isActive()) {
+			otpService.generateOTP(user.getUsername() + Constants.VerificationType.DEREGISTER);
 		} else {
-			response = "USER ALREADY INACTIVE";
+			log.error("Validation failed for user with Email: " + user.getEmail());
+			return new APIInfo(HttpStatus.BAD_REQUEST, user.getUsername(), "Validation Failed");
 		}
-		log.info("De-Registration Request Completed for: " + email + " in Time: " + (System.currentTimeMillis() - initDeRegisterStartTime) + "ms");
-		return response;
+
+		log.info("De-Registration request completed for: " + user.getEmail() + " in Time: " + (System.currentTimeMillis() - initDeRegisterStartTime) + "ms");
+		return new APIInfo(HttpStatus.ACCEPTED, user.getUsername(), "User De-Registration Started");
 	}
 
-	public String verifyOTP(String email, int otp) {
-		log.info("OTP verification request received for user with email: " + email);
+	public APIInfo verifyOTP(UserDTO userDTO, int otp, Constants.VerificationType verificationType) {
+		log.info("OTP verification request received for user with email: " + userDTO.getEmail() + ", username: " + userDTO.getUsername());
 		long initVerifyStartTime = System.currentTimeMillis();
-		String response;
-		User user = userRepository.findByEmail(email);
-		if (user != null && user.getOneTimePassword().isActive() && user.getOneTimePassword().getOtp() == otp) {
-			user.setActive(!user.isActive());
-			user.getOneTimePassword().setActive(false);
-			userRepository.save(user);
-			response = "VERIFIED";
+
+		User user = userRepository.findByEmailAndUsername(userDTO.getEmail(), userDTO.getUsername());
+		if (user == null) {
+			log.error("No User found with Email: " + userDTO.getEmail() + " and username: " + userDTO.getUsername());
+			return new APIInfo(HttpStatus.BAD_REQUEST, userDTO.getEmail(), "No user found");
 		} else {
-			response = "AUTHENTICATION FAILED";
+			Integer usersOTP;
+			try {
+				usersOTP = otpService.getOTP(userDTO.getUsername() + verificationType);
+			} catch (NullPointerException exception) {
+				log.error("OTP for user with Email: " + userDTO.getEmail() + " and username: " + userDTO.getUsername() + " not found");
+				return new APIInfo(HttpStatus.BAD_REQUEST, userDTO.getEmail(), "OTP not found");
+			}
+			if (usersOTP != null && usersOTP.equals(otp)) {
+				if (!user.isActive() && verificationType == Constants.VerificationType.REGISTER) {
+					user.setActive(true);
+				} else if (user.isActive() && verificationType == Constants.VerificationType.DEREGISTER) {
+					user.setActive(false);
+				} else {
+					log.error("OTP Validation failed for user: " + user.getEmail() + ", with OTP: " + otp);
+					return new APIInfo(HttpStatus.BAD_REQUEST, user.getUsername(), "OTP Validation Failed");
+				}
+			} else {
+				log.error("OTP Validation failed for user: " + user.getEmail() + ", with OTP: " + otp);
+				return new APIInfo(HttpStatus.BAD_REQUEST, user.getUsername(), "OTP Validation Failed");
+			}
 		}
-		log.info("OTP Verification Request Completed for: " + email + " in Time: " + (System.currentTimeMillis() - initVerifyStartTime) + "ms");
-		return response;
+
+		userRepository.save(user);
+		log.info("OTP Verification request completed for: " + userDTO.getEmail() + " in Time: " + (System.currentTimeMillis() - initVerifyStartTime) + "ms");
+		return new APIInfo(HttpStatus.OK, userDTO.getEmail(), "OTP Verification completed");
 	}
 }

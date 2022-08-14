@@ -1,10 +1,14 @@
 package com.awscclpu.mailingservice.service;
 
+import com.awscclpu.mailingservice.constant.Constants;
+import com.awscclpu.mailingservice.exception.APIInfo;
+import com.awscclpu.mailingservice.model.UserDTO;
+
 public interface UserService {
 
-	String registerUser(String name, String email);
+	APIInfo registerUser(UserDTO user);
 
-	String deRegisterUser(String email);
+	APIInfo deRegisterUser(UserDTO userDTO);
 
-	String verifyOTP(String email, int otp);
+	APIInfo verifyOTP(UserDTO user, int otp, Constants.VerificationType verificationType);
 }

@@ -1,7 +1,11 @@
 package com.awscclpu.mailingservice.constant;
 
-public class EmailConstants {
+public class Constants {
 	public enum SendType {
 		TO, CC, BCC
+	}
+
+	public enum VerificationType {
+		REGISTER, DEREGISTER
 	}
 }

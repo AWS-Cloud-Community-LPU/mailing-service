@@ -9,7 +9,9 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
+import javax.validation.ConstraintViolationException;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 @ControllerAdvice
 public class ControlAdvice extends ResponseEntityExceptionHandler {
@@ -22,13 +24,20 @@ public class ControlAdvice extends ResponseEntityExceptionHandler {
 				" method is not supported for this request. Supported methods are ");
 		Objects.requireNonNull(ex.getSupportedHttpMethods()).forEach(t -> responseMessage.append(t).append(" "));
 
-		APIError apiError = new APIError(HttpStatus.METHOD_NOT_ALLOWED, ex.getLocalizedMessage(), responseMessage.toString());
+		APIInfo apiError = new APIInfo(HttpStatus.METHOD_NOT_ALLOWED, ex.getLocalizedMessage(), responseMessage.toString());
 		return new ResponseEntity<>(apiError, headers, apiError.getStatus());
+	}
+
+	@ExceptionHandler(ConstraintViolationException.class)
+	public ResponseEntity<Object> handleConstraintViolationException(ConstraintViolationException ex, WebRequest request) {
+		String responseMessage = ex.getConstraintViolations().stream().map(constraintViolation -> constraintViolation.getMessage() + " ").collect(Collectors.joining());
+		APIInfo apiError = new APIInfo(HttpStatus.BAD_REQUEST, responseMessage, "Error Occurred");
+		return new ResponseEntity<>(apiError, new HttpHeaders(), apiError.getStatus());
 	}
 
 	@ExceptionHandler(Exception.class)
 	public ResponseEntity<Object> handleAll(Exception ex, WebRequest request) {
-		APIError apiError = new APIError(HttpStatus.INTERNAL_SERVER_ERROR, ex.getLocalizedMessage(), "Error Occurred");
+		APIInfo apiError = new APIInfo(HttpStatus.INTERNAL_SERVER_ERROR, ex.getLocalizedMessage(), "Error Occurred");
 		return new ResponseEntity<>(apiError, new HttpHeaders(), apiError.getStatus());
 	}
 }
