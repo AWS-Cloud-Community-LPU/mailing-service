@@ -3,30 +3,36 @@ package com.awscclpu.mailingservice.controllers;
 import com.awscclpu.mailingservice.constant.Constants;
 import com.awscclpu.mailingservice.exception.APIInfo;
 import com.awscclpu.mailingservice.model.UserDTO;
-import com.awscclpu.mailingservice.service.S3Service;
 import com.awscclpu.mailingservice.service.UserService;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import javax.validation.Valid;
 
 @RestController
 @RequestMapping("/user")
-public class UserController extends BaseController {
+public class UserController {
+	private final UserService userService;
 
-	public UserController(UserService userService, S3Service s3Service) {
-		super(userService, s3Service);
+	public UserController(UserService userService) {
+		this.userService = userService;
 	}
 
 	@PostMapping("/register")
-	public APIInfo register(@RequestBody UserDTO user) {
-		return userService.registerUser(user);
+	public ResponseEntity<APIInfo> register(@Valid @RequestBody UserDTO user) {
+		APIInfo apiInfo = userService.registerUser(user);
+		return ResponseEntity.status(apiInfo.getStatus()).body(apiInfo);
 	}
 
 	@PostMapping("/deregister")
-	public APIInfo deRegister(@RequestBody UserDTO userDTO) {
-		return userService.deRegisterUser(userDTO);
+	public ResponseEntity<APIInfo> deRegister(@Valid @RequestBody UserDTO userDTO) {
+		APIInfo apiInfo = userService.deRegisterUser(userDTO);
+		return ResponseEntity.status(apiInfo.getStatus()).body(apiInfo);
 	}
 
 	@PostMapping("/otp")
-	public APIInfo verifyOTP(@RequestBody UserDTO userDTO, @RequestHeader Constants.VerificationType verificationType, @RequestHeader int otp) {
-		return userService.verifyOTP(userDTO, otp, verificationType);
+	public ResponseEntity<APIInfo> verifyOTP(@Valid @RequestBody UserDTO userDTO, @RequestHeader Constants.VerificationType verificationType, @RequestHeader int otp) {
+		APIInfo apiInfo = userService.verifyOTP(userDTO, otp, verificationType);
+		return ResponseEntity.status(apiInfo.getStatus()).body(apiInfo);
 	}
 }

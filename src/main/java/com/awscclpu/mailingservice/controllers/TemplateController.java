@@ -1,40 +1,50 @@
 package com.awscclpu.mailingservice.controllers;
 
-import com.amazonaws.services.s3.model.S3Object;
-import com.amazonaws.services.s3.model.S3ObjectSummary;
+import com.awscclpu.mailingservice.exception.APIError;
+import com.awscclpu.mailingservice.exception.APIInfo;
 import com.awscclpu.mailingservice.service.S3Service;
-import com.awscclpu.mailingservice.service.UserService;
+import com.awscclpu.mailingservice.service.Utilities;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.List;
-
 @RestController
 @RequestMapping("/template")
-public class TemplateController extends BaseController {
+public class TemplateController {
 
-	public TemplateController(UserService userService, S3Service s3Service) {
-		super(userService, s3Service);
+	private final Utilities utilities;
+	private final S3Service s3Service;
+
+	public TemplateController(S3Service s3Service, Utilities utilities) {
+		this.s3Service = s3Service;
+		this.utilities = utilities;
 	}
 
 	@PostMapping("/upload")
-	public ResponseEntity<String> uploadObject(@RequestParam String bucketName, @RequestParam("file") MultipartFile templateFile) {
-		return ResponseEntity.ok(s3Service.uploadTemplate(bucketName, templateFile));
+	public ResponseEntity<APIInfo> uploadObject(@RequestParam("file") MultipartFile templateFile) {
+		APIInfo apiInfo = s3Service.uploadTemplate(templateFile);
+		return ResponseEntity.status(apiInfo.getStatus()).body(apiInfo);
 	}
 
 	@GetMapping("/list")
-	public ResponseEntity<List<S3ObjectSummary>> listTemplates() {
-		return ResponseEntity.ok(s3Service.listTemplates());
+	public ResponseEntity<APIInfo> listTemplates() throws JsonProcessingException {
+		APIInfo apiInfo = s3Service.listTemplates();
+		return ResponseEntity.status(apiInfo.getStatus()).body(apiInfo);
 	}
 
-	@GetMapping("/view")
-	public ResponseEntity<S3Object> viewTemplate(@RequestHeader String templateName) {
-		return ResponseEntity.ok(s3Service.viewTemplate(templateName));
+	@GetMapping("/download")
+	public ResponseEntity<byte[]> viewTemplate(@RequestHeader String templateName) throws APIError {
+		return ResponseEntity.ok()
+				.contentType(utilities.contentType(templateName))
+				.header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + templateName + "\"")
+				.body(s3Service.downloadTemplate(templateName).toByteArray());
 	}
 
-	@PostMapping("/delete")
-	public ResponseEntity<String> deleteTemplate(@RequestHeader String templateName) {
-		return ResponseEntity.ok(s3Service.deleteTemplate(templateName));
+	@DeleteMapping("/delete")
+	public ResponseEntity<APIInfo> deleteTemplate(@RequestHeader String templateName) throws APIError, JsonProcessingException {
+		APIInfo apiInfo = s3Service.deleteTemplate(templateName);
+		return ResponseEntity.status(apiInfo.getStatus()).body(apiInfo);
 	}
 }

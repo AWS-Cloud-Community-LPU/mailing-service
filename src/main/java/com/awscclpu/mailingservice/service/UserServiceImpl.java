@@ -1,6 +1,6 @@
 package com.awscclpu.mailingservice.service;
 
-import com.awscclpu.mailingservice.constant.Constants;
+import com.awscclpu.mailingservice.constant.Constants.VerificationType;
 import com.awscclpu.mailingservice.exception.APIInfo;
 import com.awscclpu.mailingservice.model.User;
 import com.awscclpu.mailingservice.model.UserDTO;
@@ -15,12 +15,12 @@ import org.springframework.stereotype.Service;
 public class UserServiceImpl implements UserService {
 
 	final UserRepository userRepository;
-	final OTPService otpService;
+	final CacheService cacheService;
 
 	@Autowired
-	public UserServiceImpl(UserRepository userRepository, OTPService otpService) {
+	public UserServiceImpl(UserRepository userRepository, CacheService cacheService) {
 		this.userRepository = userRepository;
-		this.otpService = otpService;
+		this.cacheService = cacheService;
 	}
 
 	public APIInfo registerUser(UserDTO userDTO) {
@@ -30,9 +30,9 @@ public class UserServiceImpl implements UserService {
 		User user = userRepository.findByEmailAndUsername(userDTO.getEmail(), userDTO.getUsername());
 		if (user == null) {
 			user = new User(userDTO);
-			otpService.generateOTP(userDTO.getUsername() + Constants.VerificationType.REGISTER);
+			cacheService.generateOTP(userDTO.getUsername() + VerificationType.REGISTER);
 		} else if (!user.isActive()) {
-			otpService.generateOTP(userDTO.getUsername() + Constants.VerificationType.REGISTER);
+			cacheService.generateOTP(userDTO.getUsername() + VerificationType.REGISTER);
 		} else {
 			log.error("Validation failed for user with Email: " + user.getEmail());
 			return new APIInfo(HttpStatus.BAD_REQUEST, user.getUsername(), "Validation Failed");
@@ -52,7 +52,7 @@ public class UserServiceImpl implements UserService {
 			log.error("No User found with Email: " + userDTO.getEmail() + " and username: " + userDTO.getUsername());
 			return new APIInfo(HttpStatus.BAD_REQUEST, userDTO.getEmail(), "No user found");
 		} else if (user.getUsername().equals(userDTO.getUsername()) && user.isActive()) {
-			otpService.generateOTP(user.getUsername() + Constants.VerificationType.DEREGISTER);
+			cacheService.generateOTP(user.getUsername() + VerificationType.DEREGISTER);
 		} else {
 			log.error("Validation failed for user with Email: " + user.getEmail());
 			return new APIInfo(HttpStatus.BAD_REQUEST, user.getUsername(), "Validation Failed");
@@ -62,7 +62,7 @@ public class UserServiceImpl implements UserService {
 		return new APIInfo(HttpStatus.ACCEPTED, user.getUsername(), "User De-Registration Started");
 	}
 
-	public APIInfo verifyOTP(UserDTO userDTO, int otp, Constants.VerificationType verificationType) {
+	public APIInfo verifyOTP(UserDTO userDTO, int otp, VerificationType verificationType) {
 		log.info("OTP verification request received for user with email: " + userDTO.getEmail() + ", username: " + userDTO.getUsername());
 		long initVerifyStartTime = System.currentTimeMillis();
 
@@ -73,15 +73,15 @@ public class UserServiceImpl implements UserService {
 		} else {
 			Integer usersOTP;
 			try {
-				usersOTP = otpService.getOTP(userDTO.getUsername() + verificationType);
+				usersOTP = cacheService.getOTP(userDTO.getUsername() + verificationType);
 			} catch (NullPointerException exception) {
 				log.error("OTP for user with Email: " + userDTO.getEmail() + " and username: " + userDTO.getUsername() + " not found");
 				return new APIInfo(HttpStatus.BAD_REQUEST, userDTO.getEmail(), "OTP not found");
 			}
 			if (usersOTP != null && usersOTP.equals(otp)) {
-				if (!user.isActive() && verificationType == Constants.VerificationType.REGISTER) {
+				if (!user.isActive() && verificationType == VerificationType.REGISTER) {
 					user.setActive(true);
-				} else if (user.isActive() && verificationType == Constants.VerificationType.DEREGISTER) {
+				} else if (user.isActive() && verificationType == VerificationType.DEREGISTER) {
 					user.setActive(false);
 				} else {
 					log.error("OTP Validation failed for user: " + user.getEmail() + ", with OTP: " + otp);

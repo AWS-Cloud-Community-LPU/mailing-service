@@ -11,12 +11,14 @@ import com.github.benmanes.caffeine.cache.Caffeine;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;
-import org.springframework.cache.caffeine.CaffeineCacheManager;
+import org.springframework.cache.caffeine.CaffeineCache;
+import org.springframework.cache.support.SimpleCacheManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.core.io.ClassPathResource;
 
+import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 
 @EnableCaching
@@ -46,11 +48,17 @@ public class ServiceConfiguration {
 
 	@Bean
 	public CacheManager cacheManager() {
-		CaffeineCacheManager caffeineCacheManager = new CaffeineCacheManager("otpCache");
-		caffeineCacheManager.setCaffeine(Caffeine.newBuilder()
-				.expireAfterWrite(2, TimeUnit.MINUTES)
-				.initialCapacity(200)
-				.maximumSize(20000));
-		return caffeineCacheManager;
+		CaffeineCache otpCache = buildCache("otpCache", 2, 200);
+		CaffeineCache templatesCache = buildCache("templatesCache", 60, 10);
+		SimpleCacheManager cacheManager = new SimpleCacheManager();
+		cacheManager.setCaches(Arrays.asList(otpCache, templatesCache));
+		return cacheManager;
+	}
+
+	private CaffeineCache buildCache(String name, int minutesToExpire, int initialCapacity) {
+		return new CaffeineCache(name, Caffeine.newBuilder()
+				.expireAfterWrite(minutesToExpire, TimeUnit.MINUTES)
+				.initialCapacity(initialCapacity)
+				.build());
 	}
 }

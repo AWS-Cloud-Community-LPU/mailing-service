@@ -16,12 +16,12 @@ public class ExecutorPoolConfig {
 	@Value("${" + PropertyConstants.THREAD_POOL_TASK_EXECUTOR_SIZE + "}")
 	private int threadPoolSize;
 
-	@Bean(name = "deactivateOTP_background_pool")
+	@Bean(name = "executorBackgroundPool")
 	public ThreadPoolTaskExecutor asyncExecutor() {
 		ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
 		executor.setCorePoolSize(threadPoolSize);
 		executor.setMaxPoolSize(threadPoolSize);
-		executor.setThreadNamePrefix("deactivateOTP_background_pool");
+		executor.setThreadNamePrefix("awscclpu-exec-thread");
 		executor.initialize();
 		return executor;
 	}

@@ -1,19 +1,20 @@
 package com.awscclpu.mailingservice.service;
 
-import com.amazonaws.services.s3.model.S3Object;
-import com.amazonaws.services.s3.model.S3ObjectSummary;
+import com.awscclpu.mailingservice.exception.APIError;
+import com.awscclpu.mailingservice.exception.APIInfo;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.List;
+import java.io.ByteArrayOutputStream;
 
 public interface S3Service {
 
-	String uploadTemplate(String bucketName, MultipartFile file);
+	APIInfo uploadTemplate(MultipartFile file);
 
-	List<S3ObjectSummary> listTemplates();
+	APIInfo listTemplates() throws JsonProcessingException;
 
-	String deleteTemplate(String templateName);
+	APIInfo deleteTemplate(String templateName) throws APIError, JsonProcessingException;
 
-	S3Object viewTemplate(String templateName);
+	ByteArrayOutputStream downloadTemplate(String templateName) throws APIError;
 
 }

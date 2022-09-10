@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -20,5 +21,16 @@ public class APIInfo {
 		this.status = status;
 		this.message = message;
 		this.description = Collections.singletonList(error);
+	}
+
+	public APIInfo(HttpStatus status, String message) {
+		super();
+		this.status = status;
+		this.message = message;
+		this.description = new ArrayList<>();
+	}
+
+	public APIInfo(APIError apiError) {
+		this(apiError.getStatus(), apiError.getMessage());
 	}
 }

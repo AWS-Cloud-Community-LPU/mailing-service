@@ -1,6 +1,7 @@
 package com.awscclpu.mailingservice.model;
 
 import com.awscclpu.mailingservice.constant.Constants;
+import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
@@ -13,8 +14,7 @@ import javax.validation.constraints.Pattern;
 import java.time.LocalDateTime;
 
 @Entity
-@Getter
-@Setter
+@Data
 @Table(name = "users")
 public class User {
 

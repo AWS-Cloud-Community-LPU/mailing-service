@@ -15,8 +15,8 @@ public class ScheduledJobs {
 		this.asyncTask = asyncTask;
 	}
 
-	@Scheduled(fixedRateString = "${" + PropertyConstants.DEACTIVATE_OTP_JOB_RATE_IN_MILLISECONDS + "}")
-	public void deactivateOlderOTP() {
-		asyncTask.deactivateOTP();
+	@Scheduled(fixedRateString = "${" + PropertyConstants.POPULATE_CACHE_IN_MILLISECONDS + "}")
+	public void populateCache() {
+		asyncTask.populateCache();
 	}
 }
