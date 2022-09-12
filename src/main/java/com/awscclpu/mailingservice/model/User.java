@@ -34,6 +34,7 @@ public class User {
 	private boolean active;
 	private Long sent_emails;
 	private Constants.SendType mailingType;
+	private Constants.Role role;
 	@UpdateTimestamp
 	private LocalDateTime updatedAt;
 	@CreationTimestamp
@@ -51,6 +52,7 @@ public class User {
 		this.active = false;
 		this.sent_emails = 0L;
 		this.mailingType = Constants.SendType.BCC;
+		this.role = Constants.Role.USER;
 	}
 
 	public User(UserDTO user) {

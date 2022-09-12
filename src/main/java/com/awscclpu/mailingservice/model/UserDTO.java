@@ -1,12 +1,10 @@
 package com.awscclpu.mailingservice.model;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 
 import javax.validation.constraints.NotNull;
 
-@Getter
-@Setter
+@Data
 public class UserDTO {
 	@NotNull
 	String name;

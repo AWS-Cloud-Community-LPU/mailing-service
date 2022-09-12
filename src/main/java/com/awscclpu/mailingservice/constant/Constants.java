@@ -8,4 +8,8 @@ public class Constants {
 	public enum VerificationType {
 		REGISTER, DEREGISTER
 	}
+
+	public enum Role {
+		ADMIN, MANAGER, USER
+	}
 }
