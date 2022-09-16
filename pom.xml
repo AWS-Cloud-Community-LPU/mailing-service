@@ -50,7 +50,7 @@
 		<dependency>
 			<groupId>com.amazonaws</groupId>
 			<artifactId>aws-java-sdk-s3</artifactId>
-			<version>1.12.299</version>
+			<version>1.12.304</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
