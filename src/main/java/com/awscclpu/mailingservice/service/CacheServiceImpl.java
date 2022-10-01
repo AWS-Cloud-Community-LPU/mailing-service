@@ -7,11 +7,14 @@ import com.amazonaws.services.s3.model.S3ObjectSummary;
 import com.awscclpu.mailingservice.constant.PropertyConstants;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
+import javax.validation.ValidationException;
+import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.text.DecimalFormat;
 import java.util.List;
@@ -36,14 +39,28 @@ public class CacheServiceImpl implements CacheService {
 	@Override
 	public Integer getOTP(String username) {
 		log.info("Trying to get OTP for: " + username);
-		return Integer.parseInt(cacheManager.getCache("otpCache").get("username").toString());
+		Cache.ValueWrapper otpWrapper = cacheManager.getCache("otpCache").get("username");
+		if (otpWrapper == null) {
+			throw new ValidationException("OTP NOT FOUND");
+		}
+		return Integer.parseInt(otpWrapper.toString());
 	}
 
 	@Cacheable(value = "otpCache")
 	@Override
 	public Integer generateOTP(String username) {
+		long initTime = System.currentTimeMillis();
 		log.info("Trying to generate OTP for: " + username);
-		return Integer.parseInt(new DecimalFormat("000000").format(new SecureRandom().nextInt(999999)));
+		SecureRandom sr;
+		try {
+			sr = SecureRandom.getInstanceStrong();
+		} catch (NoSuchAlgorithmException ex) {
+			log.error("Not able to get Secure Random Number Instance: ", ex);
+			sr = new SecureRandom();
+		}
+		String otp = new DecimalFormat("900000").format(sr.nextInt(999999));
+		log.info("OTP generated in: " + (System.currentTimeMillis() - initTime) +"ms");
+		return Integer.parseInt(otp);
 	}
 
 	@Cacheable(value = "templatesCache")

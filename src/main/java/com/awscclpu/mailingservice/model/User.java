@@ -2,8 +2,6 @@ package com.awscclpu.mailingservice.model;
 
 import com.awscclpu.mailingservice.constant.Constants;
 import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -24,8 +22,8 @@ public class User {
 	private Long id;
 	@Column(columnDefinition = "VARCHAR(150)")
 	private String name;
-	@Column(unique = true, columnDefinition = "VARCHAR(40)")
-	@Pattern(regexp = "^[a-zA-Z0-9._-]{3,}$", message = "USERNAME NOT VALID")
+	@Column(unique = true, columnDefinition = "VARCHAR(30)")
+	@Pattern(regexp = "^[\\w](?!.*?\\.{2})[\\w.]{1,28}[\\w]$", message = "USERNAME NOT VALID")
 	private String username;
 	@Column(unique = true, length = 512)
 	@Email(message = "EMAIL NOT VALID")
@@ -57,5 +55,9 @@ public class User {
 
 	public User(UserDTO user) {
 		this(user.getName(), user.getUsername(), user.getEmail());
+	}
+
+	public boolean equals(UserDTO userDTO) {
+		return (userDTO.getUsername().equals(this.getUsername()) && userDTO.getEmail().equals(this.getEmail()) && userDTO.getName().equals(this.getName()));
 	}
 }

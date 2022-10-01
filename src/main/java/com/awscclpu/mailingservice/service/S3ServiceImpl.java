@@ -10,7 +10,6 @@ import com.awscclpu.mailingservice.exception.APIError;
 import com.awscclpu.mailingservice.exception.APIInfo;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -33,7 +32,6 @@ public class S3ServiceImpl implements S3Service {
 	@Value("${" + PropertyConstants.AMAZON_S3_BUCKET + "}")
 	private String bucketName;
 
-	@Autowired
 	public S3ServiceImpl(AmazonS3 s3Client, CacheService cacheService, Utilities utilities) {
 		this.s3Client = s3Client;
 		this.cacheService = cacheService;
