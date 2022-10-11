@@ -49,7 +49,6 @@ public class CacheServiceImpl implements CacheService {
 	@Cacheable(value = "otpCache")
 	@Override
 	public Integer generateOTP(String username) {
-		long initTime = System.currentTimeMillis();
 		log.info("Trying to generate OTP for: " + username);
 		SecureRandom sr;
 		try {
@@ -59,7 +58,6 @@ public class CacheServiceImpl implements CacheService {
 			sr = new SecureRandom();
 		}
 		String otp = new DecimalFormat("900000").format(sr.nextInt(999999));
-		log.info("OTP generated in: " + (System.currentTimeMillis() - initTime) +"ms");
 		return Integer.parseInt(otp);
 	}
 
@@ -73,13 +71,13 @@ public class CacheServiceImpl implements CacheService {
 				.collect(Collectors.toList());
 	}
 
-	@CacheEvict(value = "templatesCache")
+	@CacheEvict(value = "templatesCache", allEntries = true)
 	@Override
 	public void evictTemplatesCache() {
 		log.info("Evicted Templates Cache");
 	}
 
-	@CacheEvict(value = "otpCache")
+	@CacheEvict(value = "otpCache", allEntries = true)
 	@Override
 	public void evictOTPCache() {
 		log.info("Evicted OTP Cache");
