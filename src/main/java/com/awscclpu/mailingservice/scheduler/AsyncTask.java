@@ -22,7 +22,6 @@ public class AsyncTask {
 		log.info("Starting Scheduled job for Populating Cache");
 		cacheService.evictTemplatesCache();
 		cacheService.templatesList();
-		log.info(
-				"Scheduled job for Populating Cache Job took: " + (System.currentTimeMillis() - initPopulateCacheTime) + "ms");
+		log.info("Scheduled job for Populating Cache Job took: " + (System.currentTimeMillis() - initPopulateCacheTime) + "ms");
 	}
 }

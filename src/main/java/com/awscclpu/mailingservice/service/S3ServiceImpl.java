@@ -9,6 +9,7 @@ import com.awscclpu.mailingservice.constant.PropertyConstants;
 import com.awscclpu.mailingservice.exception.APIError;
 import com.awscclpu.mailingservice.exception.APIInfo;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -29,13 +30,15 @@ public class S3ServiceImpl implements S3Service {
 	private final AmazonS3 s3Client;
 	private final CacheService cacheService;
 	private final Utilities utilities;
+	private final ObjectMapper objectMapper;
 	@Value("${" + PropertyConstants.AMAZON_S3_BUCKET + "}")
 	private String bucketName;
 
-	public S3ServiceImpl(AmazonS3 s3Client, CacheService cacheService, Utilities utilities) {
+	public S3ServiceImpl(AmazonS3 s3Client, CacheService cacheService, Utilities utilities, ObjectMapper objectMapper) {
 		this.s3Client = s3Client;
 		this.cacheService = cacheService;
 		this.utilities = utilities;
+		this.objectMapper = objectMapper;
 	}
 
 	@Override
@@ -65,7 +68,7 @@ public class S3ServiceImpl implements S3Service {
 
 	@Override
 	public APIInfo listTemplates() throws SdkClientException, JsonProcessingException {
-		return new APIInfo(HttpStatus.OK, Utilities.getObjectMapper().writeValueAsString(cacheService.templatesList()));
+		return new APIInfo(HttpStatus.OK, objectMapper.writeValueAsString(cacheService.templatesList()));
 	}
 
 	private S3Object viewTemplate(String templateName) {
@@ -93,7 +96,7 @@ public class S3ServiceImpl implements S3Service {
 			}
 		}
 		cacheService.evictTemplatesCache();
-		return new APIInfo(HttpStatus.OK, Utilities.getObjectMapper().writeValueAsString(cacheService.templatesList()));
+		return new APIInfo(HttpStatus.OK, objectMapper.writeValueAsString(cacheService.templatesList()));
 	}
 
 	private ByteArrayOutputStream downloadFile(S3Object s3Object) {

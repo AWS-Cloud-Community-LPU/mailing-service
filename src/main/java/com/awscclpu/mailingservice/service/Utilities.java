@@ -8,12 +8,6 @@ import org.springframework.stereotype.Service;
 @Service
 public class Utilities {
 
-	static ObjectMapper objectMapper = new ObjectMapper();
-
-	public static ObjectMapper getObjectMapper() {
-		return objectMapper;
-	}
-
 	/**
 	 * Finds Content type of filename by filenames postfix
 	 *

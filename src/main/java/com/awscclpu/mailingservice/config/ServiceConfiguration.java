@@ -7,6 +7,9 @@ import com.amazonaws.regions.Regions;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.awscclpu.mailingservice.constant.PropertyConstants;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.CacheManager;
@@ -15,9 +18,11 @@ import org.springframework.cache.caffeine.CaffeineCache;
 import org.springframework.cache.support.SimpleCacheManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.core.io.ClassPathResource;
 
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 
@@ -41,9 +46,20 @@ public class ServiceConfiguration {
 	}
 
 	@Bean
+	@Primary
+	public ObjectMapper objectMapper() {
+		ObjectMapper mapper = new ObjectMapper().registerModule(new JavaTimeModule());
+		mapper.configure(DeserializationFeature.READ_DATE_TIMESTAMPS_AS_NANOSECONDS, false);
+		mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+		mapper.setDateFormat(new SimpleDateFormat("dd/MM/yyyy HH/mm/ss"));
+		return mapper;
+	}
+
+	@Bean
 	public AmazonS3 getS3Client() {
 		AWSCredentials credentials = new BasicAWSCredentials(amazonS3AccessKey, amazonS3SecretKey);
-		return AmazonS3ClientBuilder.standard().withCredentials(new AWSStaticCredentialsProvider(credentials)).withRegion(Regions.AP_SOUTH_1).build();
+		return AmazonS3ClientBuilder.standard().withCredentials(new AWSStaticCredentialsProvider(credentials))
+				.withRegion(Regions.AP_SOUTH_1).build();
 	}
 
 	@Bean
@@ -56,9 +72,7 @@ public class ServiceConfiguration {
 	}
 
 	private CaffeineCache buildCache(String name, int minutesToExpire, int initialCapacity) {
-		return new CaffeineCache(name, Caffeine.newBuilder()
-				.expireAfterWrite(minutesToExpire, TimeUnit.MINUTES)
-				.initialCapacity(initialCapacity)
-				.build());
+		return new CaffeineCache(name, Caffeine.newBuilder().expireAfterWrite(minutesToExpire, TimeUnit.MINUTES)
+				.initialCapacity(initialCapacity).build());
 	}
 }
