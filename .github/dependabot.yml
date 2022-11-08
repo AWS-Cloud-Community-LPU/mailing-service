@@ -16,4 +16,4 @@ updates:
       - "garvit-joshi"
     ignore:
       - dependency-name: "aws-java-sdk-s3"
-        versions: ["1.x"]
+        versions: ["1.12.x"]
