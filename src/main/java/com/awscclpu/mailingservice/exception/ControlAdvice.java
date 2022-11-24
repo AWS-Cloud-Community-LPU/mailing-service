@@ -47,7 +47,8 @@ public class ControlAdvice extends ResponseEntityExceptionHandler {
 
 	@ExceptionHandler(ValidationException.class)
 	public ResponseEntity<Object> handleValidationException(ValidationException exception, WebRequest request) {
-		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exception.getMessage());
+		APIInfo apiInfo = new APIInfo(HttpStatus.BAD_REQUEST, exception.getLocalizedMessage(), "Validation Exception");
+		return ResponseEntity.status(apiInfo.getStatus()).body(apiInfo);
 	}
 
 	@ExceptionHandler(Exception.class)

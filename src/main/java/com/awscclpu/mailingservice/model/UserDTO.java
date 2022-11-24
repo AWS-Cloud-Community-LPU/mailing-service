@@ -1,6 +1,5 @@
 package com.awscclpu.mailingservice.model;
 
-import com.awscclpu.mailingservice.exception.APIError;
 import lombok.Data;
 
 import javax.validation.constraints.Email;
@@ -8,14 +7,21 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 
 @Data
-@NotNull(groups = APIError.class)
+@NotNull
 public class UserDTO {
-	@NotNull(groups = APIError.class)
+	@NotNull
 	String name;
-	@NotNull(groups = APIError.class)
+
+	@NotNull
 	@Pattern(regexp = "^[\\w](?!.*?\\.{2})[\\w.]{1,28}[\\w]$", message = "USERNAME NOT VALID")
 	String username;
-	@NotNull(groups = APIError.class)
-	@Email(groups = APIError.class)
+
+	// Minimum eight characters, at least one uppercase letter, one lowercase letter, one number and one special character:
+	@NotNull
+	@Pattern(regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,}$", message = "PASSWORD NOT VALID")
+	String password;
+
+	@NotNull
+	@Email
 	String email;
 }

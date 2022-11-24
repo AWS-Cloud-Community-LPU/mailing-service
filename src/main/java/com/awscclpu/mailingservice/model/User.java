@@ -9,12 +9,13 @@ import javax.persistence.*;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
+import java.io.Serializable;
 import java.time.LocalDateTime;
 
 @Entity
 @Data
 @Table(name = "users")
-public class User {
+public class User implements Serializable {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -25,6 +26,7 @@ public class User {
 	@Column(unique = true, columnDefinition = "VARCHAR(30)")
 	@Pattern(regexp = "^[\\w](?!.*?\\.{2})[\\w.]{1,28}[\\w]$", message = "USERNAME NOT VALID")
 	private String username;
+	private String password;
 	@Column(unique = true, length = 512)
 	@Email(message = "EMAIL NOT VALID")
 	@NotNull(message = "EMAIL CANNOT BE EMPTY")
@@ -42,10 +44,11 @@ public class User {
 		super();
 	}
 
-	public User(String name, String username, String email) {
+	public User(String name, String username, String email, String password) {
 		super();
 		this.name = name;
 		this.username = username;
+		this.password = password;
 		this.email = email;
 		this.active = false;
 		this.sent_emails = 0L;
@@ -54,7 +57,7 @@ public class User {
 	}
 
 	public User(UserDTO user) {
-		this(user.getName(), user.getUsername(), user.getEmail());
+		this(user.getName(), user.getUsername(), user.getEmail(), user.getPassword());
 	}
 
 	public boolean equals(UserDTO userDTO) {
