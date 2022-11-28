@@ -77,6 +77,11 @@ public class CacheServiceImpl implements CacheService {
 		log.info("Evicted Templates Cache");
 	}
 
+	/**
+	 * Evicts OTP cache
+	 *
+	 * @implNote CAUTION: Call only when necessary
+	 */
 	@CacheEvict(value = "otpCache", allEntries = true)
 	@Override
 	public void evictOTPCache() {

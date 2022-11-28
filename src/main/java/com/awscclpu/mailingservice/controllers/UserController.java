@@ -1,6 +1,7 @@
 package com.awscclpu.mailingservice.controllers;
 
 import com.awscclpu.mailingservice.constant.Constants;
+import com.awscclpu.mailingservice.exception.APIError;
 import com.awscclpu.mailingservice.exception.APIInfo;
 import com.awscclpu.mailingservice.model.UserDTO;
 import com.awscclpu.mailingservice.service.UserService;
@@ -19,13 +20,13 @@ public class UserController {
 	}
 
 	@PostMapping("/register")
-	public ResponseEntity<APIInfo> register(@Valid @RequestBody UserDTO user) {
+	public ResponseEntity<APIInfo> register(@Valid @RequestBody UserDTO user) throws APIError {
 		APIInfo apiInfo = userService.registerUser(user);
 		return ResponseEntity.status(apiInfo.getStatus()).body(apiInfo);
 	}
 
 	@PostMapping("/deregister")
-	public ResponseEntity<APIInfo> deRegister(@Valid @RequestBody UserDTO userDTO) {
+	public ResponseEntity<APIInfo> deRegister(@Valid @RequestBody UserDTO userDTO) throws APIError {
 		APIInfo apiInfo = userService.deRegisterUser(userDTO);
 		return ResponseEntity.status(apiInfo.getStatus()).body(apiInfo);
 	}

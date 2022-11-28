@@ -1,6 +1,7 @@
 package com.awscclpu.mailingservice.service;
 
 import com.awscclpu.mailingservice.constant.Constants.VerificationType;
+import com.awscclpu.mailingservice.exception.APIError;
 import com.awscclpu.mailingservice.exception.APIInfo;
 import com.awscclpu.mailingservice.model.User;
 import com.awscclpu.mailingservice.model.UserDTO;
@@ -11,50 +12,57 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
 import javax.validation.ValidationException;
 
 @Service
 @Slf4j
 @RequiredArgsConstructor
+@Transactional
 public class UserServiceImpl implements UserService {
 
 	private final UserRepository userRepository;
 	private final CacheService cacheService;
 	private final BCryptPasswordEncoder bCryptPasswordEncoder;
+	private final OTPService otpService;
 
-	public APIInfo registerUser(UserDTO userDTO) {
+	public APIInfo registerUser(UserDTO userDTO) throws APIError {
 		log.info("Registration request received for user: " + userDTO.getName() + " with email: " + userDTO.getEmail());
 		long initRegisterStartTime = System.currentTimeMillis();
 
 		User user = userRepository.findByEmailOrUsername(userDTO.getEmail(), userDTO.getUsername());
+		int generatedOTP;
 		if (user == null) {
 			user = new User(userDTO);
-			cacheService.generateOTP(userDTO.getUsername() + VerificationType.REGISTER);
+			generatedOTP = cacheService.generateOTP(userDTO.getUsername() + VerificationType.REGISTER);
 		} else if (!user.isActive() && user.equals(userDTO)) {
-			cacheService.generateOTP(userDTO.getUsername() + VerificationType.REGISTER);
+			generatedOTP = cacheService.generateOTP(userDTO.getUsername() + VerificationType.REGISTER);
 		} else {
 			log.error("Validation failed for user with Email: " + user.getEmail());
-			return new APIInfo(HttpStatus.BAD_REQUEST, user.getUsername(), "Validation Failed");
+			throw new ValidationException(user.getUsername() + " Validation Failed");
 		}
 
 		User savedUser = registerUser(user);
+		otpService.sendOTP(user.getUsername(), user.getEmail(), generatedOTP);
 		log.info(savedUser.getId() + ": Registration request completed for: " + savedUser.getName() + " with email: " + savedUser.getEmail() + " in Time: " + (System.currentTimeMillis() - initRegisterStartTime) + "ms");
 		return new APIInfo(HttpStatus.ACCEPTED, user.getUsername(), "User Registration Started");
 	}
 
-	public APIInfo deRegisterUser(UserDTO userDTO) {
+	public APIInfo deRegisterUser(UserDTO userDTO) throws APIError {
 		log.info("De-Registration request received for user with email: " + userDTO.getEmail());
 		long initDeRegisterStartTime = System.currentTimeMillis();
 
 		User user = userRepository.findByEmailOrUsername(userDTO.getEmail(), userDTO.getUsername());
 		checkPassword(userDTO, user);
+		int generatedOTP;
 		if (user.isActive() && user.equals(userDTO)) {
-			cacheService.generateOTP(user.getUsername() + VerificationType.DEREGISTER);
+			generatedOTP = cacheService.generateOTP(user.getUsername() + VerificationType.DEREGISTER);
 		} else {
 			log.error("Validation failed for user with Email: " + user.getEmail());
-			return new APIInfo(HttpStatus.BAD_REQUEST, user.getUsername(), "Validation Failed");
+			throw new ValidationException(user.getEmail() + " Validation Failed");
 		}
 
+		otpService.sendOTP(user.getUsername(), user.getEmail(), generatedOTP);
 		log.info(user.getId() + ": De-Registration request completed for: " + user.getEmail() + " in Time: " + (System.currentTimeMillis() - initDeRegisterStartTime) + "ms");
 		return new APIInfo(HttpStatus.ACCEPTED, user.getUsername(), "User De-Registration Started");
 	}

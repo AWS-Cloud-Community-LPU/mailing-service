@@ -1,7 +1,5 @@
 package com.awscclpu.mailingservice.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 
