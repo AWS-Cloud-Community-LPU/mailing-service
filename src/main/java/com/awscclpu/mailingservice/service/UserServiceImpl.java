@@ -6,14 +6,13 @@ import com.awscclpu.mailingservice.exception.APIInfo;
 import com.awscclpu.mailingservice.model.User;
 import com.awscclpu.mailingservice.model.UserDTO;
 import com.awscclpu.mailingservice.repository.UserRepository;
+import jakarta.transaction.Transactional;
+import jakarta.validation.ValidationException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
-
-import javax.transaction.Transactional;
-import javax.validation.ValidationException;
 
 @Service
 @Slf4j
@@ -103,13 +102,13 @@ public class UserServiceImpl implements UserService {
 	 * Checks if password is valid or not
 	 *
 	 * @param userDTO User DTO to be checked
-	 * @param user user Object from DB
+	 * @param user    user Object from DB
 	 * @throws ValidationException when user is null or password does not match
 	 */
 	private void checkPassword(UserDTO userDTO, User user) {
 		if (user == null)
 			throw new ValidationException("No User Found");
-		if(!bCryptPasswordEncoder.matches(userDTO.getPassword(), user.getPassword()))
+		if (!bCryptPasswordEncoder.matches(userDTO.getPassword(), user.getPassword()))
 			throw new ValidationException("Password Mismatch");
 	}
 
