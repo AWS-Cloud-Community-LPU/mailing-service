@@ -10,6 +10,7 @@ import com.awscclpu.mailingservice.exception.APIError;
 import com.awscclpu.mailingservice.exception.APIInfo;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -25,6 +26,7 @@ import java.util.Objects;
 
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class S3ServiceImpl implements S3Service {
 
 	private final AmazonS3 s3Client;
@@ -33,13 +35,6 @@ public class S3ServiceImpl implements S3Service {
 	private final ObjectMapper objectMapper;
 	@Value("${" + PropertyConstants.AMAZON_S3_BUCKET + "}")
 	private String bucketName;
-
-	public S3ServiceImpl(AmazonS3 s3Client, CacheService cacheService, Utilities utilities, ObjectMapper objectMapper) {
-		this.s3Client = s3Client;
-		this.cacheService = cacheService;
-		this.utilities = utilities;
-		this.objectMapper = objectMapper;
-	}
 
 	@Override
 	public APIInfo uploadTemplate(MultipartFile templateFile) {

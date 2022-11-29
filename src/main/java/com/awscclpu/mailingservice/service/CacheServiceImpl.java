@@ -5,6 +5,7 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.ObjectListing;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
 import com.awscclpu.mailingservice.constant.PropertyConstants;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.Cache;
@@ -22,18 +23,13 @@ import java.util.stream.Collectors;
 
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class CacheServiceImpl implements CacheService {
 	private final CacheManager cacheManager;
 	private final AmazonS3 s3Client;
 	private final Utilities utilities;
 	@Value("${" + PropertyConstants.AMAZON_S3_BUCKET + "}")
 	private String bucketName;
-
-	public CacheServiceImpl(CacheManager cacheManager, AmazonS3 s3Client, Utilities utilities) {
-		this.cacheManager = cacheManager;
-		this.s3Client = s3Client;
-		this.utilities = utilities;
-	}
 
 	@Cacheable(value = "otpCache")
 	@Override

@@ -5,22 +5,19 @@ import com.awscclpu.mailingservice.exception.APIInfo;
 import com.awscclpu.mailingservice.service.S3Service;
 import com.awscclpu.mailingservice.service.Utilities;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/template")
 public class TemplateController {
 
 	private final Utilities utilities;
 	private final S3Service s3Service;
-
-	public TemplateController(S3Service s3Service, Utilities utilities) {
-		this.s3Service = s3Service;
-		this.utilities = utilities;
-	}
 
 	@PostMapping("/upload")
 	public ResponseEntity<APIInfo> uploadObject(@RequestParam("file") MultipartFile templateFile) {
