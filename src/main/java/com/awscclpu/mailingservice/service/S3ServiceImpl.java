@@ -85,11 +85,9 @@ public class S3ServiceImpl implements S3Service {
 	public APIInfo deleteTemplate(String templateName) throws APIError, JsonProcessingException {
 		if (!utilities.verifyTemplate(templateName))
 			throw new APIError(HttpStatus.BAD_REQUEST, "Template Validation Failed");
-		for (S3ObjectSummary s3ObjectSummary : cacheService.templatesList()) {
-			if (s3ObjectSummary.getKey().equals(templateName)) {
-				s3Client.deleteObject(s3ObjectSummary.getBucketName(), s3ObjectSummary.getKey());
-			}
-		}
+		cacheService.templatesList().stream()
+				.filter(s3ObjectSummary -> s3ObjectSummary.getKey().equals(templateName))
+				.forEachOrdered(s3ObjectSummary -> s3Client.deleteObject(s3ObjectSummary.getBucketName(), s3ObjectSummary.getKey()));
 		cacheService.evictTemplatesCache();
 		return new APIInfo(HttpStatus.OK, objectMapper.writeValueAsString(cacheService.templatesList()));
 	}

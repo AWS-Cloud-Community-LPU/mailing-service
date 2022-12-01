@@ -3,7 +3,6 @@ package com.awscclpu.mailingservice.config;
 import com.amazonaws.auth.AWSCredentials;
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
-import com.amazonaws.regions.Regions;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.awscclpu.mailingservice.constant.PropertyConstants;
@@ -38,6 +37,9 @@ public class ServiceConfiguration {
 	@Value("${" + PropertyConstants.AMAZON_S3_SECRET_KEY + "}")
 	private String amazonS3SecretKey;
 
+	@Value(value = "${" + PropertyConstants.AMAZON_S3_REGION + "}")
+	private String amazonS3Region;
+
 	@Bean
 	public static PropertySourcesPlaceholderConfigurer placeholderConfigurer() {
 		PropertySourcesPlaceholderConfigurer propsConfig = new PropertySourcesPlaceholderConfigurer();
@@ -61,7 +63,7 @@ public class ServiceConfiguration {
 	public AmazonS3 getS3Client() {
 		AWSCredentials credentials = new BasicAWSCredentials(amazonS3AccessKey, amazonS3SecretKey);
 		return AmazonS3ClientBuilder.standard().withCredentials(new AWSStaticCredentialsProvider(credentials))
-				.withRegion(Regions.AP_SOUTH_1).build();
+				.withRegion(amazonS3Region).build();
 	}
 
 	@Bean

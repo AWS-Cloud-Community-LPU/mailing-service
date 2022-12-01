@@ -7,5 +7,6 @@ public class PropertyConstants {
 			POPULATE_CACHE_IN_MILLISECONDS = "populate_cache_in_milliseconds",
 			AMAZON_S3_ACCESS_KEY = "amazon.s3.access-key",
 			AMAZON_S3_SECRET_KEY = "amazon.s3.secret-key",
-			AMAZON_S3_BUCKET = "amazon.s3.bucket";
+			AMAZON_S3_BUCKET = "amazon.s3.bucket",
+			AMAZON_S3_REGION = "amazon.s3.region";
 }

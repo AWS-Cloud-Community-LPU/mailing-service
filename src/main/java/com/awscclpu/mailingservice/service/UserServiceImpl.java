@@ -26,7 +26,7 @@ public class UserServiceImpl implements UserService {
 	private final OTPService otpService;
 
 	public APIInfo registerUser(UserDTO userDTO) throws APIError {
-		log.info("Registration request received for user: " + userDTO.getName() + " with email: " + userDTO.getEmail());
+		log.info("Registration request received for user: {} with email: {}", userDTO.getName(), userDTO.getEmail());
 		long initRegisterStartTime = System.currentTimeMillis();
 
 		User user = userRepository.findByEmailOrUsername(userDTO.getEmail(), userDTO.getUsername());
@@ -37,18 +37,18 @@ public class UserServiceImpl implements UserService {
 		} else if (!user.isActive() && user.equals(userDTO)) {
 			generatedOTP = cacheService.generateOTP(userDTO.getUsername() + VerificationType.REGISTER);
 		} else {
-			log.error("Validation failed for user with Email: " + user.getEmail());
+			log.error("Validation failed for user with Email: {}", user.getEmail());
 			throw new ValidationException(user.getUsername() + " Validation Failed");
 		}
 
 		User savedUser = registerUser(user);
 		otpService.sendOTP(user.getUsername(), user.getEmail(), generatedOTP);
-		log.info(savedUser.getId() + ": Registration request completed for: " + savedUser.getName() + " with email: " + savedUser.getEmail() + " in Time: " + (System.currentTimeMillis() - initRegisterStartTime) + "ms");
+		log.info("{} Registration request completed for: {} with email: {} in Time: {}ms", savedUser.getId(),  savedUser.getName(), savedUser.getEmail(), (System.currentTimeMillis() - initRegisterStartTime));
 		return new APIInfo(HttpStatus.ACCEPTED, user.getUsername(), "User Registration Started");
 	}
 
 	public APIInfo deRegisterUser(UserDTO userDTO) throws APIError {
-		log.info("De-Registration request received for user with email: " + userDTO.getEmail());
+		log.info("De-Registration request received for user with email: {}", userDTO.getEmail());
 		long initDeRegisterStartTime = System.currentTimeMillis();
 
 		User user = userRepository.findByEmailOrUsername(userDTO.getEmail(), userDTO.getUsername());
@@ -57,17 +57,17 @@ public class UserServiceImpl implements UserService {
 		if (user.isActive() && user.equals(userDTO)) {
 			generatedOTP = cacheService.generateOTP(user.getUsername() + VerificationType.DEREGISTER);
 		} else {
-			log.error("Validation failed for user with Email: " + user.getEmail());
+			log.error("Validation failed for user with Email: {}", user.getEmail());
 			throw new ValidationException(user.getEmail() + " Validation Failed");
 		}
 
 		otpService.sendOTP(user.getUsername(), user.getEmail(), generatedOTP);
-		log.info(user.getId() + ": De-Registration request completed for: " + user.getEmail() + " in Time: " + (System.currentTimeMillis() - initDeRegisterStartTime) + "ms");
+		log.info("{}: De-Registration request completed for: {} in Time: {}ms", user.getId(), user.getEmail(), (System.currentTimeMillis() - initDeRegisterStartTime));
 		return new APIInfo(HttpStatus.ACCEPTED, user.getUsername(), "User De-Registration Started");
 	}
 
 	public APIInfo verifyOTP(UserDTO userDTO, int otp, VerificationType verificationType) {
-		log.info("OTP verification request received for user with email: " + userDTO.getEmail() + ", username: " + userDTO.getUsername());
+		log.info("OTP verification request received for user with email: {} with username: {}", userDTO.getEmail(), userDTO.getUsername());
 		long initVerifyStartTime = System.currentTimeMillis();
 
 		User user = userRepository.findByEmailAndUsername(userDTO.getEmail(), userDTO.getUsername());
@@ -76,7 +76,7 @@ public class UserServiceImpl implements UserService {
 		try {
 			usersOTP = cacheService.getOTP(userDTO.getUsername() + verificationType);
 		} catch (ValidationException exception) {
-			log.error("OTP for user with Email: " + userDTO.getEmail() + " and username: " + userDTO.getUsername() + " not found");
+			log.error("OTP for user with Email: {} and username: {} not found", userDTO.getEmail(), userDTO.getUsername());
 			return new APIInfo(HttpStatus.BAD_REQUEST, userDTO.getEmail(), exception.getMessage());
 		}
 		if (usersOTP == otp) {
@@ -85,16 +85,16 @@ public class UserServiceImpl implements UserService {
 			} else if (user.isActive() && verificationType == VerificationType.DEREGISTER) {
 				user.setActive(false);
 			} else {
-				log.error("OTP Validation failed for user: " + user.getEmail() + ", with OTP: " + otp);
+				log.error("OTP Validation failed for user: {}, with OTP: {}", user.getEmail(), otp);
 				return new APIInfo(HttpStatus.BAD_REQUEST, user.getUsername(), "OTP Validation Failed");
 			}
 		} else {
-			log.error("OTP Validation failed for user: " + user.getEmail() + ", with OTP: " + otp);
+			log.error("OTP Validation failed for user: {} with OTP {}", user.getEmail(), otp);
 			return new APIInfo(HttpStatus.BAD_REQUEST, user.getUsername(), "OTP Validation Failed");
 		}
 
 		userRepository.save(user);
-		log.info(user.getId() + ": OTP Verification request completed for: " + userDTO.getEmail() + " in Time: " + (System.currentTimeMillis() - initVerifyStartTime) + "ms");
+		log.info("{}: OTP Verification request completed for: {} in Time: {}ms", user.getId(), userDTO.getEmail(), (System.currentTimeMillis() - initVerifyStartTime));
 		return new APIInfo(HttpStatus.OK, userDTO.getEmail(), "OTP Verification completed");
 	}
 
