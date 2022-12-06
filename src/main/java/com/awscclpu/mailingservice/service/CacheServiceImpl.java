@@ -33,7 +33,7 @@ public class CacheServiceImpl implements CacheService {
 
 	@Cacheable(value = "otpCache")
 	@Override
-	public Integer getOTP(String username) {
+	public int getOTP(String username) {
 		log.info("Trying to get OTP for: {}", username);
 		Cache.ValueWrapper otpWrapper = cacheManager.getCache("otpCache").get("username");
 		if (otpWrapper == null) {
@@ -44,7 +44,7 @@ public class CacheServiceImpl implements CacheService {
 
 	@Cacheable(value = "otpCache")
 	@Override
-	public Integer generateOTP(String username) {
+	public int generateOTP(String username) {
 		log.info("Trying to generate OTP for: {}", username);
 		SecureRandom sr;
 		try {

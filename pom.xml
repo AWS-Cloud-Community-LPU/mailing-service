@@ -1,13 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
-		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
+
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
 		<version>3.0.0</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
+
 	<groupId>com.awscclpu</groupId>
 	<artifactId>mailing-service</artifactId>
 	<version>1.0</version>
@@ -17,11 +19,30 @@
 	<properties>
 		<java.version>17</java.version>
 	</properties>
+
+	<profiles>
+		<profile>
+			<id>dev</id>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
+			<properties>
+				<packaging.type>jar</packaging.type>
+				<activatedProfile>dev</activatedProfile>
+				<application.properties.name>application-dev.properties</application.properties.name>
+			</properties>
+		</profile>
+		<profile>
+			<id>prod</id>
+			<properties>
+				<packaging.type>jar</packaging.type>
+				<activatedProfile>prod</activatedProfile>
+				<application.properties.name>application-prod.properties</application.properties.name>
+			</properties>
+		</profile>
+	</profiles>
+
 	<dependencies>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-data-jpa</artifactId>
-		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-mail</artifactId>
@@ -51,6 +72,14 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-mail</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-jooq</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.flywaydb</groupId>
+			<artifactId>flyway-core</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.postgresql</groupId>
@@ -93,6 +122,29 @@
 					</excludes>
 				</configuration>
 			</plugin>
+
+
+			<!-- Read Project properties file eg: application-dev.properties from mvn use ```mvn clean install -P dev``` for activating dev property -->
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>properties-maven-plugin</artifactId>
+				<version>1.1.0</version>
+				<executions>
+					<execution>
+						<phase>initialize</phase>
+						<goals>
+							<goal>read-project-properties</goal>
+						</goals>
+						<configuration>
+							<files>
+								<file>src/main/resources/application.properties</file>
+								<file>src/main/resources/${application.properties.name}</file>
+							</files>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+
 			<!-- Maven Git Plugin -->
 			<plugin>
 				<groupId>io.github.git-commit-id</groupId>
@@ -120,6 +172,92 @@
 					</includeOnlyProperties>
 					<commitIdGenerationMode>full</commitIdGenerationMode>
 				</configuration>
+			</plugin>
+
+			<!-- flywaydb -->
+			<!-- URL, USER, PASSWORD are picked up from .properties file based on active profile. This is run when you invoke
+				mvn with `-P` flag eg: `mvn clean install -P dev` -->
+			<plugin>
+				<groupId>org.flywaydb</groupId>
+				<artifactId>flyway-maven-plugin</artifactId>
+				<executions>
+					<execution>
+						<phase>generate-sources</phase>
+						<goals>
+							<goal>migrate</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<driver>org.postgresql.Driver</driver>
+					<url>${spring.datasource.url}</url>
+					<user>${spring.datasource.username}</user>
+					<password>${spring.datasource.password}</password>
+					<baselineOnMigrate>true</baselineOnMigrate>
+					<schemas>public</schemas>
+					<locations>
+						<location>
+							filesystem:src/main/resources/db/migration
+						</location>
+					</locations>
+				</configuration>
+			</plugin>
+
+			<!-- The jOOQ code generator plugin -->
+			<plugin>
+				<groupId>org.jooq</groupId>
+				<artifactId>jooq-codegen-maven</artifactId>
+				<executions>
+					<execution>
+						<id>generate-postgres</id>
+						<phase>generate-sources</phase>
+						<goals>
+							<goal>generate</goal>
+						</goals>
+						<configuration>
+							<jdbc>
+								<driver>org.postgresql.Driver</driver>
+								<url>${spring.datasource.url}</url>
+								<user>${spring.datasource.username}</user>
+								<password>${spring.datasource.password}</password>
+							</jdbc>
+							<generator>
+								<database>
+									<name>
+										org.jooq.meta.postgres.PostgresDatabase
+									</name>
+									<includes>.*</includes>
+									<excludes>flyway_schema_history
+									</excludes>  <!-- Not needed as flywaydb generated table -->
+									<inputSchema>public</inputSchema>
+									<forcedTypes>
+										<forcedType>
+											<userType>com.awscclpu.mailingservice.constant.MailingType</userType>
+											<enumConverter>true</enumConverter>
+											<includeExpression>mailing_type</includeExpression>
+										</forcedType>
+										<forcedType>
+											<userType>com.awscclpu.mailingservice.constant.Role</userType>
+											<enumConverter>true</enumConverter>
+											<includeExpression>role</includeExpression>
+										</forcedType>
+									</forcedTypes>
+								</database>
+								<generate>
+									<pojos>true</pojos>
+									<daos>true</daos>
+									<pojosEqualsAndHashCode>true</pojosEqualsAndHashCode>
+									<javaTimeTypes>true</javaTimeTypes>
+									<fluentSetters>true</fluentSetters>
+								</generate>
+								<target>
+									<packageName>com.awscclpu.mailingservice.jooq</packageName>
+									<directory>src/main/java</directory>
+								</target>
+							</generator>
+						</configuration>
+					</execution>
+				</executions>
 			</plugin>
 		</plugins>
 	</build>

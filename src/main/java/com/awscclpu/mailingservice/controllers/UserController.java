@@ -1,6 +1,6 @@
 package com.awscclpu.mailingservice.controllers;
 
-import com.awscclpu.mailingservice.constant.Constants;
+import com.awscclpu.mailingservice.constant.VerificationType;
 import com.awscclpu.mailingservice.exception.APIError;
 import com.awscclpu.mailingservice.exception.APIInfo;
 import com.awscclpu.mailingservice.model.UserDTO;
@@ -30,7 +30,7 @@ public class UserController {
 	}
 
 	@PostMapping("/otp")
-	public ResponseEntity<APIInfo> verifyOTP(@Valid @RequestBody UserDTO userDTO, @RequestHeader Constants.VerificationType verificationType, @RequestHeader int otp) {
+	public ResponseEntity<APIInfo> verifyOTP(@Valid @RequestBody UserDTO userDTO, @RequestHeader VerificationType verificationType, @RequestHeader int otp) {
 		APIInfo apiInfo = userService.verifyOTP(userDTO, otp, verificationType);
 		return ResponseEntity.status(apiInfo.getStatus()).body(apiInfo);
 	}

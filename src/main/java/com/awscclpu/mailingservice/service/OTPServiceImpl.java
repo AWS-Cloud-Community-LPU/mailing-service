@@ -19,6 +19,7 @@ public class OTPServiceImpl implements OTPService {
 	/**
 	 * This Method sends OTP to the email provided
 	 *
+	 * @TODO: 06/10/22 Determine if this should be done in a separate thread (Non-Blocking), if done, could we use transactional there?
 	 * @param username Username of user
 	 * @param email    Email of user
 	 * @param otp      Generated OTP

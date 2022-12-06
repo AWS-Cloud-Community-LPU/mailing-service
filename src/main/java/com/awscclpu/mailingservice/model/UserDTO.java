@@ -1,13 +1,17 @@
 package com.awscclpu.mailingservice.model;
 
-import lombok.Data;
-
+import com.awscclpu.mailingservice.jooq.tables.records.UsersRecord;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 
-@Data
 @NotNull
+@Getter
+@Setter
+@RequiredArgsConstructor
 public class UserDTO {
 	@NotNull
 	String name;
@@ -24,4 +28,12 @@ public class UserDTO {
 	@NotNull
 	@Email
 	String email;
+
+
+	public boolean equals(UsersRecord usersRecord) {
+		if(usersRecord == null) return false;
+		return (usersRecord.getUsername().equals(this.getUsername())
+				&& usersRecord.getEmail().equals(this.getEmail())
+				&& usersRecord.getName().equals(this.getName()));
+	}
 }
