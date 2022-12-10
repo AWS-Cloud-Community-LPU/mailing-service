@@ -28,7 +28,7 @@ import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 
 @EnableCaching
-@Configuration
+@Configuration(proxyBeanMethods = false)
 public class ServiceConfiguration {
 
 	@Value("${" + PropertyConstants.AMAZON_S3_ACCESS_KEY + "}")
