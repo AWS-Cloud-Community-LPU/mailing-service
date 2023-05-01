@@ -1,13 +1,12 @@
 version: 2
 updates:
-
   # Maintain dependencies for GitHub Actions
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
       interval: "daily"
 
-  # Maintain dependencies for maven
+  # Maintain dependencies for Maven
   - package-ecosystem: "maven"
     directory: "/"
     schedule:
@@ -16,4 +15,15 @@ updates:
       - "garvit-joshi"
     ignore:
       - dependency-name: "aws-java-sdk-s3"
-        versions: ["1.12.x"]
+        range: "1.12.*"
+
+  # Maintain dependencies for OpenJDK
+  - package-ecosystem: "openjdk"
+    directory: "/"
+    schedule:
+      interval: "daily"
+    reviewers:
+      - "garvit-joshi"
+    ignore:
+      - dependency-name: "aws-java-sdk-s3"
+        range: "1.12.*"
