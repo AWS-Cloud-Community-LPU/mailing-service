@@ -39,7 +39,7 @@ jobs:
           ./mvnw --version
           ./mvnw -B package --file pom.xml
       - name: Upload JAR
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: Mailing-Service-JAR
           path: /home/runner/work/mailing-service/mailing-service/target/*.jar
